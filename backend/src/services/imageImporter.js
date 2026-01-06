@@ -9,9 +9,15 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const SUPPORTED_EXTENSIONS = [
-    '.jpg', '.jpeg', '.png', '.gif', '.webp',
+    // Common image formats
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp',
     '.heic', '.heif', '.tiff', '.tif',
-    '.cr2', '.nef', '.arw', '.dng', '.orf' // RAW formats
+    // RAW formats
+    '.cr2', '.nef', '.arw', '.dng', '.orf', '.rw2', '.pef',
+    // Other image formats
+    '.pcx', '.psd', '.svg',
+    // Video formats (Phase 6)
+    '.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.wmv', '.flv'
 ];
 
 const THUMBNAIL_SIZE = parseInt(process.env.THUMBNAIL_SIZE) || 300;

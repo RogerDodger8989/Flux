@@ -8,7 +8,7 @@ function ImportModal({ isOpen, onClose }) {
     const [scanning, setScanning] = useState(false);
     const [error, setError] = useState('');
 
-    const { scanFolder, importImages, importing, importProgress, importStatus } = useImageStore();
+    const { scanFolder, importImages, uploadFiles, importing, importProgress, importStatus } = useImageStore();
 
     const handleScan = async () => {
         if (!folderPath.trim()) {
@@ -30,15 +30,80 @@ function ImportModal({ isOpen, onClose }) {
         }
     };
 
+    const handleFolderSelect = (e) => {
+        const files = e.target.files;
+        if (files.length > 0) {
+            // Get the path from the first file
+            const firstFile = files[0];
+            // Extract folder path (remove filename)
+            const fullPath = firstFile.webkitRelativePath || firstFile.name;
+            const pathParts = fullPath.split('/');
+
+            // Build a more informative path display
+            // Remove the filename (last part) to get just the folder structure
+            pathParts.pop();
+            const folderStructure = pathParts.join('/');
+
+            // Show the folder structure in the input
+            setFolderPath(`📁 ${folderStructure} (${files.length} filer valda)`);
+
+            // Automatically trigger scan with the selected files
+            handleBrowserFolderScan(Array.from(files));
+        }
+    };
+
+    const handleBrowserFolderScan = async (files) => {
+        setScanning(true);
+        setError('');
+
+        try {
+            // Filter for supported image types
+            const imageFiles = files.filter(file => {
+                const ext = file.name.toLowerCase();
+                return ext.match(/\.(jpg|jpeg|png|gif|webp|bmp|heic|heif|tiff|tif|cr2|nef|arw|dng|orf|rw2|pef|pcx|psd|svg|mp4|mov|avi|mkv|webm|m4v|wmv|flv)$/);
+            });
+
+            if (imageFiles.length === 0) {
+                setError('Inga bilder hittades i vald mapp');
+                setScanning(false);
+                return;
+            }
+
+            // Create a mock scan result
+            setScanResults({
+                filesFound: imageFiles.length,
+                files: imageFiles.map(f => f.name),
+                browserFiles: imageFiles, // Store actual File objects
+            });
+            setScanning(false);
+        } catch (err) {
+            setError(err.message);
+            setScanning(false);
+        }
+    };
+
     const handleImport = async () => {
         if (!scanResults || scanResults.filesFound === 0) return;
 
         try {
             setError('');
-            const results = await importImages(scanResults.files || []);
 
-            if (results.errors.length > 0) {
-                setError(`${results.imported} bilder importerade, ${results.errors.length} fel`);
+            // Check if we have browser-selected files
+            if (scanResults.browserFiles) {
+                const results = await uploadFiles(scanResults.browserFiles);
+
+                if (results.errors.length > 0) {
+                    setError(`${results.imported} bilder importerade, ${results.errors.length} fel`);
+                } else if (results.skipped > 0) {
+                    setError(`${results.imported} bilder importerade, ${results.skipped} hoppades över (redan importerade)`);
+                }
+            } else {
+                // Use scan/import for manual path
+                const results = await importImages(scanResults.files || []);
+
+                if (results.errors.length > 0) {
+                    setError(`${results.imported} bilder importerade, ${results.errors.length} fel`);
+                }
             }
 
             // Close modal after successful import
@@ -94,41 +159,74 @@ function ImportModal({ isOpen, onClose }) {
                         {/* Folder path input */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-primary mb-2">
-                                Mappsökväg
+                                Välj mapp
                             </label>
+
+                            {/* Browse button */}
+                            <div className="mb-3">
+                                <input
+                                    type="file"
+                                    webkitdirectory="true"
+                                    directory="true"
+                                    multiple
+                                    onChange={handleFolderSelect}
+                                    className="hidden"
+                                    id="folder-input"
+                                    disabled={scanning || importing}
+                                />
+                                <label
+                                    htmlFor="folder-input"
+                                    className={`w-full px-4 py-3 bg-secondary border-2 border-dashed border-primary-500 hover:border-primary-600 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-2 text-primary font-medium ${(scanning || importing) ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                    </svg>
+                                    Bläddra efter mapp...
+                                </label>
+                            </div>
+
+                            {/* Manual path input */}
                             <div className="flex gap-3">
                                 <input
                                     type="text"
                                     value={folderPath}
                                     onChange={(e) => setFolderPath(e.target.value)}
-                                    placeholder="C:\Users\Username\Pictures"
-                                    className="flex-1 px-4 py-3 bg-secondary border border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-primary"
+                                    placeholder="Eller ange manuell sökväg: C:\Users\Username\Pictures"
+                                    className="flex-1 px-4 py-3 bg-secondary border border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-primary text-sm"
                                     disabled={scanning || importing}
                                 />
+                            </div>
+
+                            <p className="text-xs text-tertiary mt-2">
+                                Använd "Bläddra" för att välja en mapp, eller ange sökvägen manuellt
+                            </p>
+                        </div>
+
+                        {/* Scan button */}
+                        {folderPath && !folderPath.startsWith('📁') && (
+                            <div className="mb-4">
                                 <button
                                     onClick={handleScan}
                                     disabled={scanning || importing || !folderPath.trim()}
-                                    className="px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition duration-200 flex items-center gap-2"
+                                    className="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition duration-200 flex items-center justify-center gap-2"
                                 >
                                     {scanning ? (
                                         <>
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            Scannar...
+                                            Scannar mapp...
                                         </>
                                     ) : (
                                         <>
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                             </svg>
-                                            Scanna
+                                            Scanna mapp för bilder
                                         </>
                                     )}
                                 </button>
                             </div>
-                            <p className="text-xs text-tertiary mt-2">
-                                Ange sökvägen till mappen med dina bilder
-                            </p>
-                        </div>
+                        )}
 
                         {/* Error message */}
                         {error && (
@@ -156,7 +254,7 @@ function ImportModal({ isOpen, onClose }) {
                                             Redo att importera
                                         </div>
                                         <p className="text-xs text-tertiary">
-                                            Stödda format: JPG, PNG, WEBP, HEIC, RAW (CR2, NEF, ARW)
+                                            Stödda format: JPG, PNG, GIF, BMP, WEBP, HEIC, TIFF, PCX, PSD, SVG • RAW (CR2, NEF, ARW, DNG, ORF) • Video (MP4, MOV, AVI, MKV, WEBM)
                                         </p>
                                     </div>
                                 ) : (

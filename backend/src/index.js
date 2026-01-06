@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.js';
 import healthRoutes from './routes/health.js';
 import imageRoutes from './routes/images.js';
 import thumbnailRoutes from './routes/thumbnails.js';
+import uploadRoutes from './routes/upload.js';
 
 // Import middleware
 import { rateLimiter } from './middleware/rateLimiter.js';
@@ -60,6 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/thumbnails', thumbnailRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Serve static frontend in production
 if (process.env.NODE_ENV === 'production') {

@@ -38,6 +38,55 @@ const useImageStore = create((set, get) => ({
         }
     },
 
+    uploadFiles: async (files) => {
+        set({ importing: true, importProgress: 0, importStatus: 'Laddar upp bilder...' });
+
+        try {
+            const formData = new FormData();
+
+            // Add all files to FormData
+            files.forEach((file) => {
+                formData.append('files', file);
+            });
+
+            // Upload to backend
+            const { data } = await api.post('/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    set({
+                        importProgress: progress,
+                        importStatus: `Laddar upp... ${progress}%`
+                    });
+                },
+            });
+
+            set({
+                importing: false,
+                importProgress: 100,
+                importStatus: `Upload klar! ${data.imported} bilder importerade.`
+            });
+
+            // Refresh image list
+            get().fetchImages();
+
+            return {
+                imported: data.imported,
+                errors: data.errors || [],
+                skipped: data.skipped || 0
+            };
+        } catch (error) {
+            set({
+                importing: false,
+                importProgress: 0,
+                importStatus: 'Upload misslyckades'
+            });
+            throw error;
+        }
+    },
+
     importImages: async (files) => {
         set({ importing: true, importProgress: 0, importStatus: 'Importerar bilder...' });
 
