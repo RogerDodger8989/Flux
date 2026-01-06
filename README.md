@@ -4,7 +4,7 @@
 
 ## 🎯 Features
 
-### Phase 1 (MVP) - Complete
+### Phase 1 (MVP) - ✅ Complete
 - ✅ Docker deployment for TrueNAS Scale
 - ✅ Multi-user authentication (Admin + User roles)
 - ✅ Security: CSP headers, rate limiting, session management
@@ -12,9 +12,23 @@
 - ✅ Light/Dark theme with CSS variables
 - ✅ Keyboard shortcuts (press `?`)
 - ✅ PWA support for offline mode
-- ✅ Image import with EXIF extraction
-- ✅ Thumbnail generation with Sharp
 - ✅ Health monitoring endpoint
+
+### Phase 2 (Image Import & Organization) - ✅ Complete
+- ✅ Browser folder upload with progress tracking
+- ✅ Image import with EXIF extraction
+- ✅ Thumbnail generation with Sharp (300x300)
+- ✅ Grid view with 4 size options (small, medium, large, xlarge)
+- ✅ View controls (Grid/List toggle)
+- ✅ 30+ file format support (JPG, PNG, GIF, BMP, WEBP, HEIC, RAW, Video prep)
+- ✅ LocalStorage persistence for UI preferences
+
+### Phase 3 (Inspector Panel) - 🚧 In Progress
+- 🔨 Inspector panel with image details
+- 🔨 EXIF metadata display
+- 🔨 Rating and labeling system
+- 📋 Favorite marking
+- 📋 Metadata editing
 
 ## 🚀 Quick Start
 
