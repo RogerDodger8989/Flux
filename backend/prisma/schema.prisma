@@ -55,6 +55,14 @@ model Image {
   shutterSpeed String?
   iso         Int?
   
+  // IPTC & XMP metadata (Lightroom)
+  title       String?  // Image title
+  description String?  // Image description/caption
+  keywords    String?  // Comma-separated keywords
+  people      String?  // Comma-separated people names
+  copyright   String?  // Copyright notice
+  creator     String?  // Creator/Artist name
+  
   // Geolocation
   latitude    Float?
   longitude   Float?

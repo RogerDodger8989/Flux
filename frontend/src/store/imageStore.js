@@ -3,6 +3,7 @@ import api from '../utils/api';
 
 const useImageStore = create((set, get) => ({
     images: [],
+    selectedImage: null,
     total: 0,
     loading: false,
     error: null,
@@ -11,6 +12,27 @@ const useImageStore = create((set, get) => ({
     importing: false,
     importProgress: 0,
     importStatus: '',
+
+    setSelectedImage: (imageId) => {
+        const image = get().images.find(img => img.id === imageId);
+        set({ selectedImage: image || null });
+    },
+
+    updateImageMetadata: async (id, metadata) => {
+        try {
+            const { data } = await api.patch(`/images/${id}`, metadata);
+
+            set(state => ({
+                images: state.images.map(img => img.id === id ? data : img),
+                selectedImage: state.selectedImage?.id === id ? data : state.selectedImage
+            }));
+
+            return data;
+        } catch (error) {
+            console.error('Failed to update metadata:', error);
+            throw error;
+        }
+    },
 
     fetchImages: async (params = {}) => {
         set({ loading: true, error: null });

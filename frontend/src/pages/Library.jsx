@@ -3,10 +3,11 @@ import useImageStore from '../store/imageStore';
 import useViewStore from '../store/viewStore';
 import ImportModal from '../components/ImportModal';
 import ViewControls from '../components/ViewControls';
+import InspectorPanel from '../components/InspectorPanel';
 
 function Library() {
     const [showImportModal, setShowImportModal] = useState(false);
-    const { images, loading, fetchImages } = useImageStore();
+    const { images, loading, fetchImages, setSelectedImage } = useImageStore();
     const { gridSize } = useViewStore();
 
     useEffect(() => {
@@ -78,6 +79,7 @@ function Library() {
                     {images.map((image) => (
                         <div
                             key={image.id}
+                            onClick={() => setSelectedImage(image.id)}
                             className="group relative aspect-square bg-secondary rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary-500 transition"
                         >
                             {/* Thumbnail */}
@@ -130,6 +132,9 @@ function Library() {
                 isOpen={showImportModal}
                 onClose={() => setShowImportModal(false)}
             />
+
+            {/* Inspector Panel */}
+            <InspectorPanel />
         </div>
     );
 }

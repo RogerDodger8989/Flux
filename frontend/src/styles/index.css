@@ -43,6 +43,20 @@ body {
   transition: background-color 0.2s ease;
 }
 
+@keyframes slide-left {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-left {
+  animation: slide-left 0.3s ease-out;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -71,39 +85,39 @@ body {
   .bg-primary {
     background-color: var(--bg-primary);
   }
-  
+
   .bg-secondary {
     background-color: var(--bg-secondary);
   }
-  
+
   .bg-tertiary {
     background-color: var(--bg-tertiary);
   }
-  
+
   .text-primary {
     color: var(--text-primary);
   }
-  
+
   .text-secondary {
     color: var(--text-secondary);
   }
-  
+
   .text-tertiary {
     color: var(--text-tertiary);
   }
-  
+
   .border-default {
     border-color: var(--border-color);
   }
-  
+
   .accent {
     color: var(--accent);
   }
-  
+
   .bg-accent {
     background-color: var(--accent);
   }
-  
+
   .bg-accent:hover {
     background-color: var(--accent-hover);
   }
