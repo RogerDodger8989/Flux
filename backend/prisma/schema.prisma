@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Single user for the application
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // bcrypt hashed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images    Image[]
+  albums    Album[]
+}
+
+// Image metadata
+model Image {
+  id          String   @id @default(cuid())
+  filename    String
+  filepath    String   @unique
+  fileHash    String   @unique // SHA-256 for bit-rot detection
+  fileSize    Int
+  mimeType    String
+  
+  // Image properties
+  width       Int?
+  height      Int?
+  
+  // Thumbnails
+  thumbnailPath String?
+  previewPath   String?
+  
+  // User metadata
+  rating      Float    @default(0)  // 0-5 stars
+  colorLabel  String?  // red, yellow, green, blue
+  isFavorite  Boolean  @default(false)
+  isArchived  Boolean  @default(false)
+  
+  // EXIF data (stored as JSON)
+  exifData    String?  // JSON string
+  dateTaken   DateTime?
+  cameraModel String?
+  lensModel   String?
+  focalLength Float?
+  aperture    Float?
+  shutterSpeed String?
+  iso         Int?
+  
+  // Geolocation
+  latitude    Float?
+  longitude   Float?
+  location    String?  // reverse geocoded location
+  
+  // Organization
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  albums      AlbumImage[]
+  tags        ImageTag[]
+  
+  // Soft delete
+  deletedAt   DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([rating])
+  @@index([dateTaken])
+  @@index([deletedAt])
+}
+
+// Albums/Collections
+model Album {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  coverImageId String?
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  images      AlbumImage[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+// Many-to-many relationship between Images and Albums
+model AlbumImage {
+  imageId   String
+  albumId   String
+  order     Int      @default(0)
+  
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  
+  addedAt   DateTime @default(now())
+  
+  @@id([imageId, albumId])
+  @@index([albumId])
+}
+
+// Tags for images
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      String   @default("manual") // manual, ai-detected, person, object
+  
+  images    ImageTag[]
+  
+  createdAt DateTime @default(now())
+}
+
+// Many-to-many relationship between Images and Tags
+model ImageTag {
+  imageId   String
+  tagId     String
+  confidence Float?   // For AI-detected tags
+  
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  addedAt   DateTime @default(now())
+  
+  @@id([imageId, tagId])
+  @@index([tagId])
+}

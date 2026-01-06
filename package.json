@@ -1,0 +1,41 @@
+{
+  "name": "flux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted, privacy-focused photo platform with professional editing tools",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/flux"
+  },
+  "keywords": [
+    "photo-management",
+    "self-hosted",
+    "privacy",
+    "pwa",
+    "image-processing"
+  ],
+  "author": "Dennis",
+  "license": "MIT"
+}
