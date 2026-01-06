@@ -11,7 +11,8 @@ import authRoutes from './routes/auth.js';
 import healthRoutes from './routes/health.js';
 import imageRoutes from './routes/images.js';
 import thumbnailRoutes from './routes/thumbnails.js';
-import previewRoutes from './routes/previews.js'; // New import
+import previewRoutes from './routes/previews.js';
+import searchRoutes from './routes/search.js'; // New import
 import uploadRoutes from './routes/upload.js';
 
 // Import middleware
@@ -62,7 +63,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/thumbnails', thumbnailRoutes);
-app.use('/api/previews', previewRoutes); // New route
+app.use('/api/previews', previewRoutes);
+app.use('/api/search', searchRoutes); // New route
 app.use('/api/upload', uploadRoutes);
 
 // Serve static frontend in production
